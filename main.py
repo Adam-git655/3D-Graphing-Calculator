@@ -11,7 +11,7 @@ running = True
 dt = 0
 
 metaballs = []
-numMetaballs = 10
+numMetaballs = 5
 
 GRID_SIZE = 10
 rows = screen.get_height() // GRID_SIZE
@@ -70,27 +70,29 @@ def marchSquares(field):
             edgePairs = LOOKUP_TABLE[bitIndex]
 
             for i in range(0, len(edgePairs), 2):
-                pos1 = estimatePoint(row, col, edgePairs[i])
-                pos2 = estimatePoint(row, col, edgePairs[i + 1])
+                pos1 = estimatePoint(field, row, col, edgePairs[i])
+                pos2 = estimatePoint(field, row, col, edgePairs[i + 1])
                 lineSegments.append((pos1, pos2))
     
     return lineSegments
 
-#midpoint approach
-def estimatePoint(row, col, edge):
+#estimate point on the edge using linear interpolation
+def estimatePoint(field, row, col, edge):
     x = col * GRID_SIZE
     y = row * GRID_SIZE
-    half = GRID_SIZE//2
 
-    if (edge == 0):
-        return (x + half, y)
-    elif (edge == 1):
-        return (x + GRID_SIZE, y + half)
-    elif (edge == 2):
-        return (x + half, y + GRID_SIZE)
-    elif (edge == 3):
-        return (x, y + half)
+    if edge == 0:
+        return (linearlyInterpolate(field[row][col], field[row][col + 1], x, x + GRID_SIZE) , y)
+    elif edge == 1:
+        return (x + GRID_SIZE, linearlyInterpolate(field[row][col + 1], field[row + 1][col + 1], y, y + GRID_SIZE))
+    elif edge == 2:
+        return (linearlyInterpolate(field[row + 1][col], field[row + 1][col + 1], x, x + GRID_SIZE), y + GRID_SIZE)
+    elif edge == 3:
+        return (x, linearlyInterpolate(field[row][col], field[row + 1][col], y, y + GRID_SIZE))
 
+
+def linearlyInterpolate(fieldVal1, fieldVal2, point1, point2):
+    return (point1 + (point2 - point1) * ((1 - fieldVal1)/(fieldVal2 - fieldVal1)))
 
 for i in range(0, numMetaballs):
     pos = pygame.Vector2(random.randrange(100, screen.get_width() - 100), random.randrange(100, screen.get_height() - 100))
@@ -118,12 +120,9 @@ while running:
     field = computeField()
     segments = marchSquares(field)
 
+    #RENDER
     for seg in segments:
         pygame.draw.line(screen, (0, 255, 0), seg[0], seg[1], 1)          
-
-    #RENDER
-    for b in metaballs:
-        pygame.draw.circle(screen, b.color, pygame.Vector2(b.x, b.y), b.radius, width = 3)   
 
     #window swap chain
     pygame.display.flip()
