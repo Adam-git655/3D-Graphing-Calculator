@@ -13,22 +13,41 @@ dt = 0
 metaballs = []
 numMetaballs = 10
 
-GRID_SIZE = 20
+GRID_SIZE = 10
 rows = screen.get_height() // GRID_SIZE
 cols = screen.get_width() // GRID_SIZE
+
+LOOKUP_TABLE = [
+    [],             #0000
+    [2, 3],         #0001
+    [1, 2],         #0010
+    [1, 3],         #0011
+    [0, 1],         #0100
+    [3, 0,  1, 2],  #0101
+    [0, 2],         #0110
+    [0, 3],         #0111
+    [0, 3],         #1000
+    [0, 2],         #1001
+    [0, 1,  2, 3],  #1010
+    [0, 1],         #1011
+    [1, 3],         #1100
+    [1, 2],         #1101
+    [2, 3],         #1110
+    [],             #1111
+]
 
 
 def computeField():
     field = []
-    for i in range(rows):
+    for i in range(rows + 1):
         field.append([])
-        for j in range(cols):
+        for j in range(cols + 1):
             field[i].append(0)
     
-    for i in range(rows):
-        for j in range(cols):
-            sampleX = j * GRID_SIZE + (GRID_SIZE//2)
-            sampleY = i * GRID_SIZE + (GRID_SIZE//2)
+    for i in range(rows + 1):
+        for j in range(cols + 1):
+            sampleX = j * GRID_SIZE
+            sampleY = i * GRID_SIZE
 
             val = 0
             for b in metaballs:
@@ -37,6 +56,41 @@ def computeField():
             field[i][j] = val
     
     return field
+
+def marchSquares(field):
+    lineSegments = []
+    for row in range(rows):
+        for col in range(cols):
+            tl = field[row][col]
+            tr = field[row][col + 1]
+            br = field[row + 1][col + 1]
+            bl = field[row + 1][col]
+
+            bitIndex = ((tl > 1.0) << 3 | (tr > 1.0) << 2 | (br > 1.0) << 1 | (bl > 1.0) << 0)
+            edgePairs = LOOKUP_TABLE[bitIndex]
+
+            for i in range(0, len(edgePairs), 2):
+                pos1 = estimatePoint(row, col, edgePairs[i])
+                pos2 = estimatePoint(row, col, edgePairs[i + 1])
+                lineSegments.append((pos1, pos2))
+    
+    return lineSegments
+
+#midpoint approach
+def estimatePoint(row, col, edge):
+    x = col * GRID_SIZE
+    y = row * GRID_SIZE
+    half = GRID_SIZE//2
+
+    if (edge == 0):
+        return (x + half, y)
+    elif (edge == 1):
+        return (x + GRID_SIZE, y + half)
+    elif (edge == 2):
+        return (x + half, y + GRID_SIZE)
+    elif (edge == 3):
+        return (x, y + half)
+
 
 for i in range(0, numMetaballs):
     pos = pygame.Vector2(random.randrange(100, screen.get_width() - 100), random.randrange(100, screen.get_height() - 100))
@@ -62,12 +116,10 @@ while running:
         b.collideWithBoundaries(screen.get_width(), screen.get_height())  
     
     field = computeField()
-    for row in range(rows):
-        for col in range(cols):
-            rect = pygame.Rect(col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+    segments = marchSquares(field)
 
-            if field[row][col] > 1:
-                pygame.draw.rect(screen, (0, 128, 0), rect)
+    for seg in segments:
+        pygame.draw.line(screen, (0, 255, 0), seg[0], seg[1], 1)          
 
     #RENDER
     for b in metaballs:
