@@ -12,7 +12,17 @@ class MetaBall:
         self.y += self.velY * dt
 
     def collideWithBoundaries(self, screenWidth, screenHeight):
-        if (self.x + self.radius >= screenWidth) or (self.x - self.radius <= 0):
-            self.velX *= -1
-        if (self.y + self.radius >= screenHeight) or (self.y - self.radius <= 0):
-            self.velY *= -1
+        if (self.x + self.radius >= screenWidth):
+            self.x = screenWidth - self.radius
+            self.velX = -abs(self.velX)
+
+        elif (self.x - self.radius <= 0):
+            self.x = self.radius
+            self.velX = abs(self.velX)
+
+        if (self.y + self.radius >= screenHeight):
+            self.y = screenHeight - self.radius
+            self.velY = -abs(self.velY)
+        elif (self.y - self.radius <= 0):
+            self.y = self.radius
+            self.velY = abs(self.velY)
