@@ -7,7 +7,7 @@ class CubeMesh(BaseMesh):
 
         self.app = app
         self.ctx = app.ctx
-        self.program = app.shader.quad
+        self.program = app.shader.cube
 
         self.vboFormat = '3f 3f'
         self.attributes = ('in_position', 'in_color')
@@ -46,7 +46,7 @@ class CubeMesh(BaseMesh):
         *[(1.0, 1.0, 0.0)] * 6,  # right  — yellow
         *[(1.0, 0.0, 1.0)] * 6,  # top    — magenta
         *[(0.0, 1.0, 1.0)] * 6,  # bottom — cyan
-        
+
         ], dtype=np.float32)
 
         return np.hstack([vertices, colors], dtype="float32")

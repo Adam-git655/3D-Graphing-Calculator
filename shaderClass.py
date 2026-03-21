@@ -5,16 +5,16 @@ class Shader:
         self.app = app
         self.ctx = app.ctx
         self.player = app.player
-        self.quad = self.getShaderProgram(shader_name='quad')
+        self.cube = self.getShaderProgram(shader_name='cube')
 
         self.setUniformsOnInit()
         
     def setUniformsOnInit(self):
-        self.quad['projMat'].write(self.player.projMat)
-        self.quad['modelMat'].write(glm.mat4())
+        self.cube['projMat'].write(self.player.projMat)
+        self.cube['modelMat'].write(glm.mat4())
 
     def update(self):
-        self.quad['viewMat'].write(self.player.viewMat)
+        self.cube['viewMat'].write(self.player.viewMat)
 
     def getShaderProgram(self, shader_name):
         with open(f'shaders/{shader_name}.vert') as file:
