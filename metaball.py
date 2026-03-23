@@ -19,7 +19,7 @@ class MetaBall:
         self.x += self.velX * self.app.dt
         self.y += self.velY * self.app.dt
         self.z += self.velZ * self.app.dt
-        self.collideWithBoundaries(3, 3, 3)
+        self.collideWithBoundaries(BOUND, BOUND, BOUND)
         self.updateModelMat()
 
     def updateModelMat(self):

@@ -6,6 +6,7 @@ class Shader:
         self.ctx = app.ctx
         self.player = app.player
         self.sphere = self.getShaderProgram(shader_name='sphere')
+        self.grid = self.getShaderProgram(shader_name='grid')
 
         self.setUniformsOnInit()
         
@@ -13,8 +14,12 @@ class Shader:
         self.sphere['projMat'].write(self.player.projMat)
         self.sphere['modelMat'].write(glm.mat4())
 
+        self.grid['projMat'].write(self.player.projMat)
+        self.grid['modelMat'].write(glm.mat4())
+
     def update(self):
         self.sphere['viewMat'].write(self.player.viewMat)
+        self.grid['viewMat'].write(self.player.viewMat)
 
     def getShaderProgram(self, shader_name):
         with open(f'shaders/{shader_name}.vert') as file:
