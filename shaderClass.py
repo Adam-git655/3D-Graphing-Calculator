@@ -7,6 +7,7 @@ class Shader:
         self.player = app.player
         self.sphere = self.getShaderProgram(shader_name='sphere')
         self.grid = self.getShaderProgram(shader_name='grid')
+        self.triangle = self.getShaderProgram(shader_name='triangle')
 
         self.setUniformsOnInit()
         
@@ -17,9 +18,14 @@ class Shader:
         self.grid['projMat'].write(self.player.projMat)
         self.grid['modelMat'].write(glm.mat4())
 
+        self.triangle['projMat'].write(self.player.projMat)
+        self.triangle['modelMat'].write(glm.mat4())
+        
+
     def update(self):
         self.sphere['viewMat'].write(self.player.viewMat)
         self.grid['viewMat'].write(self.player.viewMat)
+        self.triangle['viewMat'].write(self.player.viewMat)
 
     def getShaderProgram(self, shader_name):
         with open(f'shaders/{shader_name}.vert') as file:
