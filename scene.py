@@ -37,6 +37,7 @@ class Scene:
         self.gridX, self.gridY, self.gridZ = np.meshgrid(x, y, z, indexing='ij')
 
         self.grid = GridMesh(app)
+        self.showGrid = False
         self.triangleMesh = None
 
         MAX_TRIANGLES = GRID_SIZE ** 3 * 5
@@ -70,7 +71,9 @@ class Scene:
             self.vertexCount = 0
 
     def render(self):
-        # self.grid.render()
+        if self.showGrid:
+            self.grid.render()
+            
         # for ball in self.metaballs:
         #     ball.render()
 

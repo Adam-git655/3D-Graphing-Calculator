@@ -191,6 +191,9 @@ class Engine:
             if event.type == pygame.QUIT:
                 self.isRunning = False
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                self.scene.showGrid = not self.scene.showGrid
+
     def run(self):
         while self.isRunning:
             self.handleEvents()
