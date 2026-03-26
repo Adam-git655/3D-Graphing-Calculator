@@ -89,56 +89,51 @@ class Scene:
     
     def marchCubes(self, field):
         verts = []
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                for k in range(GRID_SIZE):
 
-                    cornerFieldVals = np.array(
-                        [
-                            field[i, j, k],
-                            field[i + 1, j, k],
-                            field[i, j + 1, k],
-                            field[i + 1, j + 1, k],
-                            field[i, j, k + 1],
-                            field[i + 1, j, k + 1],
-                            field[i, j + 1, k + 1],
-                            field[i + 1, j + 1, k + 1]
-                        ]
-                    )
+        cornerFieldValsFullGrid = [
+            field[:-1, :-1, :-1],
+            field[1:, :-1, :-1],
+            field[:-1, 1:, :-1],
+            field[1:, 1:, :-1],
+            field[:-1, :-1, 1:],
+            field[1:, :-1, 1:],
+            field[:-1, 1:, 1:],
+            field[1:, 1:, 1:]
+        ]
 
-                    cornerWorldPositions = np.array(
-                        [
-                            (self.gridX[i, j, k], self.gridY[i, j, k], self.gridZ[i, j, k]),
-                            (self.gridX[i + 1, j, k], self.gridY[i + 1, j, k], self.gridZ[i + 1, j, k]),
-                            (self.gridX[i, j + 1, k], self.gridY[i, j + 1, k], self.gridZ[i, j + 1, k]),
-                            (self.gridX[i + 1, j + 1, k], self.gridY[i + 1, j + 1, k], self.gridZ[i + 1, j + 1, k]),
-                            (self.gridX[i, j, k + 1], self.gridY[i, j, k + 1], self.gridZ[i, j, k + 1]),
-                            (self.gridX[i + 1, j, k + 1], self.gridY[i + 1, j, k + 1], self.gridZ[i + 1, j, k + 1]),
-                            (self.gridX[i, j + 1, k + 1], self.gridY[i, j + 1, k + 1], self.gridZ[i, j + 1, k + 1]),
-                            (self.gridX[i + 1, j + 1, k + 1], self.gridY[i + 1, j + 1, k + 1], self.gridZ[i + 1, j + 1, k + 1])
-                        ]
-                    )
+        bitIndex = np.zeros((GRID_SIZE, GRID_SIZE, GRID_SIZE), dtype=np.int32)
+        for bit in range(8):
+            bitIndex |= ((cornerFieldValsFullGrid[bit] > 1.0).astype(np.int32) << bit)
 
-                    bitIndex = ((cornerFieldVals[7] > 1.0) << 7 | 
-                                (cornerFieldVals[6] > 1.0) << 6 | 
-                                (cornerFieldVals[5] > 1.0) << 5 | 
-                                (cornerFieldVals[4] > 1.0) << 4 |
-                                (cornerFieldVals[3] > 1.0) << 3 |
-                                (cornerFieldVals[2] > 1.0) << 2 |
-                                (cornerFieldVals[1] > 1.0) << 1 |
-                                (cornerFieldVals[0] > 1.0) << 0)
-                    
+        activeCells = np.argwhere((bitIndex > 0) & (bitIndex < 255))
 
-                    edgeTriplets = LOOKUP_TRIANGLE_TABLE[bitIndex]
+        for (i, j, k) in activeCells:
+            bitIdx = bitIndex[i, j, k]
+            cornerFieldVals = np.array([cornerFieldValsFullGrid[b][i, j, k] for b in range(8)])
 
-                    for t in range(0, len(edgeTriplets), 3):
-                        if edgeTriplets[t] == -1:
-                            break
+            cornerWorldPositions = np.array(
+                [
+                    (self.gridX[i, j, k], self.gridY[i, j, k], self.gridZ[i, j, k]),
+                    (self.gridX[i + 1, j, k], self.gridY[i + 1, j, k], self.gridZ[i + 1, j, k]),
+                    (self.gridX[i, j + 1, k], self.gridY[i, j + 1, k], self.gridZ[i, j + 1, k]),
+                    (self.gridX[i + 1, j + 1, k], self.gridY[i + 1, j + 1, k], self.gridZ[i + 1, j + 1, k]),
+                    (self.gridX[i, j, k + 1], self.gridY[i, j, k + 1], self.gridZ[i, j, k + 1]),
+                    (self.gridX[i + 1, j, k + 1], self.gridY[i + 1, j, k + 1], self.gridZ[i + 1, j, k + 1]),
+                    (self.gridX[i, j + 1, k + 1], self.gridY[i, j + 1, k + 1], self.gridZ[i, j + 1, k + 1]),
+                    (self.gridX[i + 1, j + 1, k + 1], self.gridY[i + 1, j + 1, k + 1], self.gridZ[i + 1, j + 1, k + 1])
+                ]
+            )
 
-                        p1 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t])
-                        p2 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 1])
-                        p3 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 2])
-                        verts.extend([p1, p2, p3])
+            edgeTriplets = LOOKUP_TRIANGLE_TABLE[bitIdx]
+
+            for t in range(0, len(edgeTriplets), 3):
+                if edgeTriplets[t] == -1:
+                    break
+
+                p1 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t])
+                p2 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 1])
+                p3 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 2])
+                verts.extend([p1, p2, p3])
         
         return verts
     
