@@ -1,16 +1,15 @@
 #version 330 core
 
 layout (location = 0) in vec3 in_position;
-layout (location = 1) in vec3 in_color;
 
 uniform mat4 projMat;
 uniform mat4 viewMat;
 uniform mat4 modelMat;
 
-out vec3 v_color;
+out vec3 v_worldPos;
 
 void main()
 {
-    v_color = in_color;
+    v_worldPos = in_position;
     gl_Position = projMat * viewMat * modelMat * vec4(in_position, 1.0);
 }

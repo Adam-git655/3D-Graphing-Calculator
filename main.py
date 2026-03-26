@@ -178,6 +178,8 @@ class Engine:
 
         self.dt = self.clock.tick(60) / 1000
         self.time = pygame.time.get_ticks() * 0.001
+        fps = self.clock.get_fps()
+        pygame.display.set_caption(f'FPS: {fps:.0f}')
 
     def render(self):
         self.ctx.clear(color=BG_COLOR)

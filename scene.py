@@ -1,5 +1,6 @@
 from settings import *
 import random
+import moderngl as mgl
 from metaball import MetaBall
 from meshes.gridMesh import GridMesh
 from meshes.triangleMesh import TriangleMesh
@@ -8,8 +9,9 @@ from lookupTable import *
 class Scene:
     def __init__(self, app):
         self.app = app
+        self.ctx = app.ctx
         self.metaballs = []
-        self.numMetaballs = 5
+        self.numMetaballs = 10
 
         for i in range(0, self.numMetaballs):
             pos = glm.vec3(
@@ -37,25 +39,44 @@ class Scene:
         self.grid = GridMesh(app)
         self.triangleMesh = None
 
+        MAX_TRIANGLES = GRID_SIZE ** 3 * 5
+        MAX_VERTICES = MAX_TRIANGLES * 3
+
+        self.commonMeshVBO = self.ctx.buffer(
+            reserve = MAX_VERTICES * 3 * 4,  #total bytes to prereserve on gpu
+            dynamic = True #fast writes
+        )
+
+        self.commonMeshVAO = self.ctx.vertex_array(
+            self.app.shader.triangle,
+            [(self.commonMeshVBO, '3f', 'in_position')],
+            skip_errors = True
+        )
+
+        self.vertexCount = 0
+
     def update(self):
         for ball in self.metaballs:
             ball.update()
 
         field = self.computeField()
-        triangleSegs = self.marchCubes(field)
+        verts = self.marchCubes(field)
 
-        if triangleSegs:
-            self.triangleMesh = TriangleMesh(self.app, triangleSegs)
+        if len(verts) > 0:
+            data = np.array(verts, dtype="float32")
+            self.commonMeshVBO.write(data.tobytes())
+            self.vertexCount = len(verts)
         else:
-            self.triangleMesh = None
+            self.vertexCount = 0
 
     def render(self):
         self.grid.render()
         # for ball in self.metaballs:
         #     ball.render()
 
-        if self.triangleMesh:
-            self.triangleMesh.render()
+        if self.vertexCount > 0:
+            self.app.shader.triangle['time'].value = self.app.time
+            self.commonMeshVAO.render(mgl.TRIANGLES, vertices=self.vertexCount)
 
     def computeField(self):
         field = np.zeros((GRID_SIZE + 1, GRID_SIZE + 1, GRID_SIZE + 1))
@@ -67,7 +88,7 @@ class Scene:
         return field
     
     def marchCubes(self, field):
-        triangleSegments = []
+        verts = []
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 for k in range(GRID_SIZE):
@@ -117,9 +138,9 @@ class Scene:
                         p1 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t])
                         p2 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 1])
                         p3 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 2])
-                        triangleSegments.append((p1, p2, p3))
+                        verts.extend([p1, p2, p3])
         
-        return triangleSegments
+        return verts
     
     def estimatePoint(self, cornerWorldPositions, cornerFieldVals, edge):
         vertices = EDGE_VERTEX_INDICES[edge]

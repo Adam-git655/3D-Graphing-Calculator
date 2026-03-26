@@ -20,6 +20,7 @@ class Shader:
 
         self.triangle['projMat'].write(self.player.projMat)
         self.triangle['modelMat'].write(glm.mat4())
+        self.triangle['bound'].value = float(BOUND)
         
 
     def update(self):
