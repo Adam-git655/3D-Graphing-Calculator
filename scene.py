@@ -70,7 +70,7 @@ class Scene:
             self.vertexCount = 0
 
     def render(self):
-        self.grid.render()
+        # self.grid.render()
         # for ball in self.metaballs:
         #     ball.render()
 

@@ -1,4 +1,3 @@
-from numba import njit
 import numpy as np
 import glm
 import math
@@ -19,6 +18,6 @@ PLAYER_POS = glm.vec3(0,0,3)
 MOUSE_SENSITIVITY = 0.002
 
 BOUND = 3
-GRID_SIZE = 20
+GRID_SIZE = 30
 
 BG_COLOR = glm.vec3(0.1, 0.16, 0.25)
