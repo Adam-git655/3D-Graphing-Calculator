@@ -9,6 +9,7 @@ class TriangleMesh(BaseMesh):
         self.ctx = app.ctx
         self.program = app.shader.triangle
         self.triangles = triangles
+        self.time = app.time
 
         self.vboFormat = '3f 3f'
         self.attributes = ('in_position', 'in_color')
@@ -21,7 +22,12 @@ class TriangleMesh(BaseMesh):
         for triangle in self.triangles:
             for point in triangle:
                 vertices.append(point)
-                colors.append((0.0, 1.0, 0.5))
+
+                t = (point[1] + BOUND) / (2 * BOUND)
+                r = 0.5 + 0.5 * np.sin(self.time + t * np.pi)
+                g = 0.5 + 0.5 * np.sin(self.time + t * np.pi + 2.094)  # 120° offset
+                b = 0.5 + 0.5 * np.sin(self.time + t * np.pi + 4.189)  # 240° offset
+                colors.append((r, g, b))
 
         return np.hstack([
             np.array(vertices, dtype="float32"), 

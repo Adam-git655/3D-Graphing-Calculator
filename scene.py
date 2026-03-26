@@ -114,20 +114,23 @@ class Scene:
                         if edgeTriplets[t] == -1:
                             break
 
-                        p1 = self.estimatePoint(cornerWorldPositions, edgeTriplets[t])
-                        p2 = self.estimatePoint(cornerWorldPositions, edgeTriplets[t + 1])
-                        p3 = self.estimatePoint(cornerWorldPositions, edgeTriplets[t + 2])
+                        p1 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t])
+                        p2 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 1])
+                        p3 = self.estimatePoint(cornerWorldPositions, cornerFieldVals, edgeTriplets[t + 2])
                         triangleSegments.append((p1, p2, p3))
         
         return triangleSegments
     
-    def estimatePoint(self, cornerWorldPositions, edge):
+    def estimatePoint(self, cornerWorldPositions, cornerFieldVals, edge):
         vertices = EDGE_VERTEX_INDICES[edge]
         return  (
-                    (cornerWorldPositions[vertices[0]][0] + cornerWorldPositions[vertices[1]][0]) / 2,
-                    (cornerWorldPositions[vertices[0]][1] + cornerWorldPositions[vertices[1]][1]) / 2,
-                    (cornerWorldPositions[vertices[0]][2] + cornerWorldPositions[vertices[1]][2]) / 2
+                    self.linearlyInterpolate(cornerFieldVals[vertices[0]], cornerFieldVals[vertices[1]], cornerWorldPositions[vertices[0]][0], cornerWorldPositions[vertices[1]][0]),
+                    self.linearlyInterpolate(cornerFieldVals[vertices[0]], cornerFieldVals[vertices[1]], cornerWorldPositions[vertices[0]][1], cornerWorldPositions[vertices[1]][1]),
+                    self.linearlyInterpolate(cornerFieldVals[vertices[0]], cornerFieldVals[vertices[1]], cornerWorldPositions[vertices[0]][2], cornerWorldPositions[vertices[1]][2])
                 )   
+    
+    def linearlyInterpolate(self, fieldVal1, fieldVal2, point1, point2):
+        return (point1 + (point2 - point1) * ((1 - fieldVal1)/(fieldVal2 - fieldVal1)))
                 
                 
         
