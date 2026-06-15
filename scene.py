@@ -88,6 +88,8 @@ class Scene:
             dy = self.gridY - ball.y
             dz = self.gridZ - ball.z 
             field += ((ball.radius * ball.radius) / (dx * dx + dy * dy + dz * dz + 1e-5))
+
+        #field = np.sin(self.gridX)*np.cos(self.gridY) + np.sin(self.gridY)*np.cos(self.gridZ) + np.sin(self.gridZ)*np.cos(self.gridX)
         return field
     
     def marchCubes(self, field):
@@ -106,7 +108,7 @@ class Scene:
 
         bitIndex = np.zeros((GRID_SIZE, GRID_SIZE, GRID_SIZE), dtype=np.int32)
         for bit in range(8):
-            bitIndex |= ((cornerFieldValsFullGrid[bit] > 1.0).astype(np.int32) << bit)
+            bitIndex |= ((cornerFieldValsFullGrid[bit] > ISO_LEVEL).astype(np.int32) << bit)
 
         activeCells = np.argwhere((bitIndex > 0) & (bitIndex < 255))
 
@@ -149,7 +151,7 @@ class Scene:
                 )   
     
     def linearlyInterpolate(self, fieldVal1, fieldVal2, point1, point2):
-        return (point1 + (point2 - point1) * ((1 - fieldVal1)/(fieldVal2 - fieldVal1)))
+        return (point1 + (point2 - point1) * ((ISO_LEVEL - fieldVal1)/(fieldVal2 - fieldVal1)))
                 
                 
         
