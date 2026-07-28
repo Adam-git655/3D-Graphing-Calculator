@@ -12,5 +12,5 @@ void main()
     float r = 0.5 + 0.5 * sin(time + t * 3.14159);
     float g = 0.5 + 0.5 * sin(time + t * 3.14159 + 2.094);
     float b = 0.5 + 0.5 * sin(time + t * 3.14159 + 4.189);
-    fragColor = vec4(r, g, b, 1.0);
+    fragColor = vec4(0.5, 0.5, 0.5, 1.0);
 }

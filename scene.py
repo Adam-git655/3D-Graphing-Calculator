@@ -39,6 +39,7 @@ class Scene:
         self.grid = GridMesh(app)
         self.showGrid = False
         self.triangleMesh = None
+        self.updateField = True
 
         MAX_TRIANGLES = GRID_SIZE ** 3 * 5
         MAX_VERTICES = MAX_TRIANGLES * 3
@@ -57,18 +58,21 @@ class Scene:
         self.vertexCount = 0
 
     def update(self):
-        for ball in self.metaballs:
-            ball.update()
+        if (self.updateField):
+            self.updateField = False
 
-        field = self.computeField()
-        verts = self.marchCubes(field)
+            for ball in self.metaballs:
+                ball.update()
 
-        if len(verts) > 0:
-            data = np.array(verts, dtype="float32")
-            self.commonMeshVBO.write(data.tobytes())
-            self.vertexCount = len(verts)
-        else:
-            self.vertexCount = 0
+            field = self.computeField()
+            verts = self.marchCubes(field)
+
+            if len(verts) > 0:
+                data = np.array(verts, dtype="float32")
+                self.commonMeshVBO.write(data.tobytes())
+                self.vertexCount = len(verts)
+            else:
+                self.vertexCount = 0
 
     def render(self):
         if self.showGrid:
@@ -82,14 +86,32 @@ class Scene:
             self.commonMeshVAO.render(mgl.TRIANGLES, vertices=self.vertexCount)
 
     def computeField(self):
+        x, y, z = self.gridX, self.gridY, self.gridZ
+
+        #metaballs
+        self.updateField = True
         field = np.zeros((GRID_SIZE + 1, GRID_SIZE + 1, GRID_SIZE + 1))
         for ball in self.metaballs:
-            dx = self.gridX - ball.x
-            dy = self.gridY - ball.y
-            dz = self.gridZ - ball.z 
+            dx = x - ball.x
+            dy = y - ball.y
+            dz = z - ball.z 
             field += ((ball.radius * ball.radius) / (dx * dx + dy * dy + dz * dz + 1e-5))
+        field -= 1
 
-        #field = np.sin(self.gridX)*np.cos(self.gridY) + np.sin(self.gridY)*np.cos(self.gridZ) + np.sin(self.gridZ)*np.cos(self.gridX)
+        #sphere
+        # r = 2
+        # field = x*x + y*y + z*z - r
+
+        #torus
+        #R, r = 1.5, 0.5
+        #field = (np.sqrt(x*x + y*y) - R)**2 + z*z - r*r
+
+        #gyroid
+        #field = np.sin(x)*np.cos(y) + np.sin(y)*np.cos(z) + np.sin(z)*np.cos(x)
+
+        #tanglecube
+        #field = x**4 - 5*x*x + y**4 - 5*y*y + z**4 - 5*z*z + 11.8
+
         return field
     
     def marchCubes(self, field):
