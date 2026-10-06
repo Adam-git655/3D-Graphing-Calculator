@@ -37,7 +37,7 @@ class Scene:
         self.gridX, self.gridY, self.gridZ = np.meshgrid(x, y, z, indexing='ij')
 
         self.grid = GridMesh(app)
-        self.showGrid = False
+        self.showGrid = True
         self.triangleMesh = None
         self.updateField = True
 
@@ -89,22 +89,22 @@ class Scene:
         x, y, z = self.gridX, self.gridY, self.gridZ
 
         #metaballs
-        self.updateField = True
-        field = np.zeros((GRID_SIZE + 1, GRID_SIZE + 1, GRID_SIZE + 1))
-        for ball in self.metaballs:
-            dx = x - ball.x
-            dy = y - ball.y
-            dz = z - ball.z 
-            field += ((ball.radius * ball.radius) / (dx * dx + dy * dy + dz * dz + 1e-5))
-        field -= 1
+        # self.updateField = True
+        # field = np.zeros((GRID_SIZE + 1, GRID_SIZE + 1, GRID_SIZE + 1))
+        # for ball in self.metaballs:
+        #     dx = x - ball.x
+        #     dy = y - ball.y
+        #     dz = z - ball.z 
+        #     field += ((ball.radius * ball.radius) / (dx * dx + dy * dy + dz * dz + 1e-5))
+        # field -= 1
 
         #sphere
         # r = 2
         # field = x*x + y*y + z*z - r
 
         #torus
-        #R, r = 1.5, 0.5
-        #field = (np.sqrt(x*x + y*y) - R)**2 + z*z - r*r
+        R, r = 1.5, 0.5
+        field = (np.sqrt(x*x + y*y) - R)**2 + z*z - r*r
 
         #gyroid
         #field = np.sin(x)*np.cos(y) + np.sin(y)*np.cos(z) + np.sin(z)*np.cos(x)
