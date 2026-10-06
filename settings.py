@@ -21,4 +21,4 @@ BOUND = 3
 GRID_SIZE = 30
 ISO_LEVEL = 0.0
 
-BG_COLOR = glm.vec3(0.1, 0.16, 0.25)
+BG_COLOR = glm.vec3(0.0, 0.0, 0.0)
