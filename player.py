@@ -9,8 +9,9 @@ class Player(Camera):
         super().__init__(position, yaw, pitch)
 
     def update(self):
-        self.OnInput()
-        self.OnMouseCallback()
+        if not self.app.menuMode:
+            self.OnInput()
+            self.OnMouseCallback()
         super().update()
 
     def OnMouseCallback(self):

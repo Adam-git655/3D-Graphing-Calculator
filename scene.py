@@ -5,31 +5,16 @@ from metaball import MetaBall
 from meshes.gridMesh import GridMesh
 from meshes.triangleMesh import TriangleMesh
 from lookupTable import *
+from graphFunctions import FUNCTIONS
 
 class Scene:
     def __init__(self, app):
         self.app = app
         self.ctx = app.ctx
         self.metaballs = []
-        self.numMetaballs = 10
 
-        for i in range(0, self.numMetaballs):
-            pos = glm.vec3(
-                    random.uniform(-1, 1),
-                    random.uniform(-1, 1),
-                    random.uniform(-1, 1)
-                    )
-            
-            vel = glm.vec3(
-                    random.uniform(-1, 1),
-                    random.uniform(-1, 1),
-                    random.uniform(-1, 1)
-                    )
-            
-            r = random.uniform(0.3, 0.7)
-            
-            mb = MetaBall(app, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, r)
-            self.metaballs.append(mb)
+        self.graphKey = None
+        self.graphValues = {}
 
         x = np.linspace(-BOUND, BOUND, GRID_SIZE + 1)
         y = np.linspace(-BOUND, BOUND, GRID_SIZE + 1)
@@ -57,30 +42,55 @@ class Scene:
 
         self.vertexCount = 0
 
-    def update(self):
-        if (self.updateField):
-            self.updateField = False
+    def setGraph(self, key, values):
+        self.graphKey = key
+        self.graphValues = dict(values)
+        self.metaballs = []
 
+        if key == "metaballs":
+            numMetaballs = int(round(values["count"]))
+            for i in range(numMetaballs):
+                x = random.uniform(-1, 1)
+                y = random.uniform(-1, 1)
+                z = random.uniform(-1, 1)
+                velX = random.uniform(-1, 1)
+                velY = random.uniform(-1, 1)
+                velZ = random.uniform(-1, 1)
+                radius = random.uniform(0.3, 0.7)
+
+                mb = MetaBall(self.app, x, y, z, velX, velY, velZ, radius)
+                self.metaballs.append(mb)
+
+        self.updateField = True
+
+
+    def update(self):
+        if (self.graphKey is None):
+            return
+
+        #keep updating field for metaballs since its an animated function. dont do that for static functions
+        if (self.graphKey == "metaballs"):
             for ball in self.metaballs:
                 ball.update()
+        elif self.updateField == "False":
+            return
 
-            field = self.computeField()
-            verts = self.marchCubes(field)
+        self.updateField = False
 
-            if len(verts) > 0:
-                data = np.array(verts, dtype="float32")
-                self.commonMeshVBO.write(data.tobytes())
-                self.vertexCount = len(verts)
-            else:
-                self.vertexCount = 0
+        field = self.computeField()
+        verts = self.marchCubes(field)
+
+        if len(verts) > 0:
+            data = np.array(verts, dtype="float32")
+            self.commonMeshVBO.write(data.tobytes())
+            self.vertexCount = len(verts)
+        else:
+            self.vertexCount = 0
 
     def render(self):
         if self.showGrid:
             self.grid.render()
             
-        # for ball in self.metaballs:
-        #     ball.render()
-
         if self.vertexCount > 0:
             self.app.shader.triangle['time'].value = self.app.time
             self.commonMeshVAO.render(mgl.TRIANGLES, vertices=self.vertexCount)
@@ -89,30 +99,23 @@ class Scene:
         x, y, z = self.gridX, self.gridY, self.gridZ
 
         #metaballs
-        # self.updateField = True
-        # field = np.zeros((GRID_SIZE + 1, GRID_SIZE + 1, GRID_SIZE + 1))
-        # for ball in self.metaballs:
-        #     dx = x - ball.x
-        #     dy = y - ball.y
-        #     dz = z - ball.z 
-        #     field += ((ball.radius * ball.radius) / (dx * dx + dy * dy + dz * dz + 1e-5))
-        # field -= 1
-
-        #sphere
-        # r = 2
-        # field = x*x + y*y + z*z - r
-
-        #torus
-        R, r = 1.5, 0.5
-        field = (np.sqrt(x*x + y*y) - R)**2 + z*z - r*r
-
-        #gyroid
-        #field = np.sin(x)*np.cos(y) + np.sin(y)*np.cos(z) + np.sin(z)*np.cos(x)
-
-        #tanglecube
-        #field = x**4 - 5*x*x + y**4 - 5*y*y + z**4 - 5*z*z + 11.8
-
-        return field
+        if (self.graphKey == "metaballs"):
+            field = np.zeros((GRID_SIZE + 1, GRID_SIZE + 1, GRID_SIZE + 1))
+            for ball in self.metaballs:
+                dx = x - ball.x
+                dy = y - ball.y
+                dz = z - ball.z 
+                field += ((ball.radius * ball.radius) / (dx * dx + dy * dy + dz * dz + 1e-5))
+            field -= 1
+            return field
+        #static functions
+        else:
+            function = FUNCTIONS[self.graphKey]
+            #convert global coordinates (-B to B) into box coordinates (-1 to 1), for the function
+            boxX = x / BOUND
+            boxY = y / BOUND
+            boxZ = z / BOUND
+            return function(boxX, boxY, boxZ, self.graphValues)
     
     def marchCubes(self, field):
         verts = []

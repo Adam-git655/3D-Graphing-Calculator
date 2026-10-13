@@ -159,6 +159,8 @@ class Engine:
         self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
         self.ctx.gc_mode = 'auto'
 
+        self.menuMode = False
+
         self.clock = pygame.time.Clock()
         self.dt = 0
         self.time = 0
@@ -168,6 +170,8 @@ class Engine:
 
         self.isRunning = True
         self.onInit()
+
+        self.setMenuMode(False)
 
     def onInit(self):
         self.player = Player(self)
@@ -180,7 +184,24 @@ class Engine:
         self.imguiRenderer = PygameRenderer()
         self.menu = UIMenu(self.scene)
 
+        print("hi")
 
+    def setMenuMode(self, enabled):
+        self.menuMode = enabled
+        pygame.event.set_grab(not enabled)
+        pygame.mouse.set_visible(enabled)
+
+        pygame.mouse.get_rel()
+
+        io = imgui.get_io()
+        flags = int(io.config_flags)
+        noMouse = imgui.ConfigFlags_.no_mouse.value
+        if enabled:
+            io.config_flags = flags & ~noMouse
+        else:
+            io.config_flags = flags | noMouse
+
+        
     def update(self):
         self.player.update()
         self.shader.update()
@@ -214,6 +235,9 @@ class Engine:
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
                 self.scene.showGrid = not self.scene.showGrid
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.setMenuMode(not self.menuMode)
 
     def run(self):
         while self.isRunning:
