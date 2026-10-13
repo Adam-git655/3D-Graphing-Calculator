@@ -141,6 +141,10 @@ import moderngl as mgl
 import pygame
 import sys
 
+from imgui_bundle import imgui
+from imgui_bundle.python_backends.pygame_backend import PygameRenderer
+from UIMenu import UIMenu
+
 class Engine:
     def __init__(self):
         pygame.init()
@@ -170,6 +174,12 @@ class Engine:
         self.shader = Shader(self)
         self.scene = Scene(self)
 
+        #initialize imgui
+        imgui.create_context()
+        imgui.get_io().display_size = pygame.display.get_surface().get_size()
+        self.imguiRenderer = PygameRenderer()
+        self.menu = UIMenu(self.scene)
+
 
     def update(self):
         self.player.update()
@@ -184,10 +194,21 @@ class Engine:
     def render(self):
         self.ctx.clear(color=BG_COLOR)
         self.scene.render()
+
+        #render imgui
+        self.imguiRenderer.process_inputs()
+        imgui.new_frame()
+        self.menu.draw()
+        imgui.render()
+        self.imguiRenderer.render(imgui.get_draw_data())
+
         pygame.display.flip()
 
     def handleEvents(self):
         for event in pygame.event.get():
+            #process events in imgui windows
+            self.imguiRenderer.process_event(event)
+
             if event.type == pygame.QUIT:
                 self.isRunning = False
 
