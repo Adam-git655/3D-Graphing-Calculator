@@ -72,7 +72,7 @@ class Scene:
         if (self.graphKey == "metaballs"):
             for ball in self.metaballs:
                 ball.update()
-        elif self.updateField == "False":
+        elif not self.updateField:
             return
 
         self.updateField = False
