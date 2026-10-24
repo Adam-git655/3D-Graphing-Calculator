@@ -5,16 +5,12 @@ class Shader:
         self.app = app
         self.ctx = app.ctx
         self.player = app.player
-        self.sphere = self.getShaderProgram(shader_name='sphere')
         self.grid = self.getShaderProgram(shader_name='grid')
         self.triangle = self.getShaderProgram(shader_name='triangle')
 
         self.setUniformsOnInit()
         
     def setUniformsOnInit(self):
-        self.sphere['projMat'].write(self.player.projMat)
-        self.sphere['modelMat'].write(glm.mat4())
-
         self.grid['projMat'].write(self.player.projMat)
         self.grid['modelMat'].write(glm.mat4())
 
@@ -24,7 +20,6 @@ class Shader:
         
 
     def update(self):
-        self.sphere['viewMat'].write(self.player.viewMat)
         self.grid['viewMat'].write(self.player.viewMat)
         self.triangle['viewMat'].write(self.player.viewMat)
 

@@ -1,5 +1,4 @@
 from settings import *
-from meshes.sphereMesh import SphereMesh
 
 class MetaBall:
     def __init__(self, app, x, y, z, velX, velY, velZ, radius=0.5):
@@ -12,8 +11,6 @@ class MetaBall:
         self.velY = velY
         self.velZ = velZ
         self.radius = radius
-
-        self.sphere = SphereMesh(app, 20, 20, radius)
     
     def update(self):
         self.x += self.velX * self.app.dt
@@ -25,7 +22,6 @@ class MetaBall:
     def updateModelMat(self):
         modelMat = glm.mat4()
         modelMat = glm.translate(modelMat, glm.vec3(self.x, self.y, self.z))
-        self.app.shader.sphere['modelMat'].write(modelMat)
 
     def collideWithBoundaries(self, boundaryWidth, boundaryHeight, boundaryDepth):
         if (self.x + self.radius >= boundaryWidth):
@@ -54,4 +50,3 @@ class MetaBall:
 
     def render(self):
         self.updateModelMat()
-        self.sphere.render()
