@@ -21,8 +21,7 @@ class Engine:
         pygame.display.set_mode(WIN_RES, flags=pygame.OPENGL | pygame.DOUBLEBUF)
         self.ctx = mgl.create_context()
 
-        self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
-        self.ctx.front_face = 'cw'
+        self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.BLEND)
         self.ctx.gc_mode = 'auto'
 
         self.menuMode = False
