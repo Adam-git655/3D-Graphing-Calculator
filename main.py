@@ -22,6 +22,7 @@ class Engine:
         self.ctx = mgl.create_context()
 
         self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
+        self.ctx.front_face = 'cw'
         self.ctx.gc_mode = 'auto'
 
         self.menuMode = False
