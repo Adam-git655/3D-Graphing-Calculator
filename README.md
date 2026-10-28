@@ -1,5 +1,5 @@
 ## Overview
-A graphing calculator turns an equation into a picture. Most graphing tools draw flat curves such as y = f(x). This project extends the idea to three dimensions. The user chooses a surface described by an equation of the form f(x, y, z) = 0, and the program draws it as a solid, shaded surface that can be explored from any angle with a free-flying camera. Shapes such as a sphere, a torus, a gyroid and animated metaballs are built in, and the settings of any graph can be saved in a database and loaded again later.
+A real-time 3D Graphing calculator built using Python and ModernGL
 
 <img width="1590" height="892" alt="Screenshot 2026-10-25 020539" src="https://github.com/user-attachments/assets/a2072542-57e3-4358-84be-72062544ac2c" />
 <img width="1592" height="892" alt="Screenshot 2026-10-25 021514" src="https://github.com/user-attachments/assets/63028679-e1a2-49d4-8716-a5af25922398" />
